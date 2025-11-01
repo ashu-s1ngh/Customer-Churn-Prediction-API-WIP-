@@ -1,0 +1,12 @@
+# Virtual environment
+/venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+
+# Logs and local artifacts
+*.log
+
+# Docker/local artifacts
+*.swp

@@ -1,0 +1,6 @@
+# Ignore local development files
+__pycache__
+*.pyc
+.venv
+.git
+.gitignore

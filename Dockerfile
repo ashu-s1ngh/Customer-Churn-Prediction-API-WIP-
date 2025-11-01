@@ -1,7 +1,18 @@
-FROM python:3.10-slim
-WORKDIR /app
+# Stage 1
+FROM amazonlinux:2023 AS builder
+WORKDIR /build
+RUN dnf update -y && \
+    dnf install -y gcc-c++ python3.11-devel python3.11-pip && \
+    dnf clean all
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN pip3.11 install --no-cache-dir --target="./packages" -r requirements.txt
+
+# Stage 2
+FROM public.ecr.aws/lambda/python:3.11
+WORKDIR /var/task
+COPY --from=builder /build/packages/ .
+COPY main.py .
+COPY preprocessor_pipeline.joblib .
+COPY churn_model.joblib .
+CMD ["main.handler"]

@@ -19,23 +19,24 @@ jobs:
                 aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
                 aws-region: "us-east-1"
 
-            - name: Log in to AWS Publiic ECR
+            - name: Log in to AWS Public ECR
               run: |
                 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
             - name: Build, Tag and Push image to ECR
               env:
-                ECR_REPO_NAME: "churn-prediction-api"
+                ECR_REPO_URI: "public.ecr.aws/a5q2p4d5/churn-prediction-api"
               run: |
+                echo "Building and tagging image: $ECR_REPO_URI:latest"
                 # Build the Docker Image
-                docker build -t $ECR-REPO-NAME .
-                docker tag public.ecr.aws/a5q2p4d5/churn-prediction-api:latest
+                docker build -t $ECR_REPO_URI:latest .
 
-                docker push $ECR_REPO_NAME:latest
+                echo "Pushing image to ECR"
+                docker push $ECR_REPO_URI:latest
 
             - name: Update Lambda Function Code
               env:
-                ECR_REPO_URI: "public.ecr.aws/a5q2p4d5/churn-prediction-api: latest"
+                ECR_REPO_URI: "public.ecr.aws/a5q2p4d5/churn-prediction-api:latest"
                 LAMBDA_FUNCTION_NAME: "churn-prediction-api"
                 LAMBDA_REGION: "us-east-1"
               run: |

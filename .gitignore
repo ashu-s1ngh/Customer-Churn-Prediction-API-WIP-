@@ -1,11 +1,37 @@
-# Virtual environment
-/venv/
+# --- Python ---
+# Virtual Environments
+.venv/
+venv/
+env/
 
-# Python temporary files
+# Bytecode and cache
 __pycache__/
 *.pyc
 
-# Logs and local artifacts
+# --- Sensitive Info ---
+# Environment variables
+.env
+*.env
+
+# --- Data ---
+*.csv
+
+# --- Editor Configs ---
+# VS Code, PyCharm, etc.
+.vscode/
+.idea/
+
+# --- Jupyter Notebook ---
+# Checkpoint files
+.ipynb_checkpoints/
+
+# --- OS Files ---
+# Mac
+.DS_Store
+# Windows
+Thumbs.db
+
+# --- Logs ---
 *.log
 
 # Docker/local artifacts

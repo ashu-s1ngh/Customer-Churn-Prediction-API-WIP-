@@ -1,48 +1,62 @@
+# This is the "human-readable" name of the workflow, which will show up in your GitHub Actions tab.
 name: Build and Deploy to AWS ECR & Lambda
 
+# --- Trigger ---
+# This workflow is "paused" and set to a MANUAL trigger.
+# It will NOT run on a 'push'. It will only run when you
+# go to the GitHub "Actions" tab and manually click "Run workflow".
 on:
-    push:
-        branches: ["main"]
+  workflow_dispatch:
 
+# --- Jobs ---
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
+  build-and-deploy:
+    # Use a standard, clean Linux virtual machine
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
+    # --- Steps ---
+    steps:
+      # Step 1: Get the code from the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-                aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-                aws-region: "us-east-1"
+      # Step 2: Configure AWS Credentials from GitHub Secrets
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # These are securely stored in GitHub > Settings > Secrets > Actions
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # This must be the AWS region for your ECR and Lambda
+          aws-region: "YOUR_AWS_REGION" # e.g., us-east-1
 
-            - name: Log in to AWS Public ECR
-              run: |
-                aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      # Step 3: Log in to Amazon ECR (Private)
+      - name: Log in to Amazon ECR (Private)
+        run: |
+          aws ecr get-login-password --region YOUR_AWS_REGION | docker login --username AWS --password-stdin YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_AWS_REGION.amazonaws.com
 
-            - name: Build, Tag and Push image to ECR
-              env:
-                ECR_REPO_URI: "public.ecr.aws/a5q2p4d5/churn-prediction-api"
-              run: |
-                echo "Building and tagging image: $ECR_REPO_URI:latest"
-                # Build the Docker Image
-                docker build -t $ECR_REPO_URI:latest .
+      # Step 4: Build, Tag, and Push Image to Private ECR
+      - name: Build, Tag, and Push Image to Private ECR
+        env:
+          # This is the full URI for your private ECR repository
+          ECR_REPO_URI: "YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_AWS_REGION.amazonaws.com/YOUR_REPO_NAME"
+        run: |
+          echo "Building and tagging image: $ECR_REPO_URI:latest"
+          docker build -t $ECR_REPO_URI:latest .
+          
+          echo "Pushing image to ECR..."
+          docker push $ECR_REPO_URI:latest
 
-                echo "Pushing image to ECR"
-                docker push $ECR_REPO_URI:latest
-
-            - name: Update Lambda Function Code
-              env:
-                ECR_REPO_URI: "public.ecr.aws/a5q2p4d5/churn-prediction-api:latest"
-                LAMBDA_FUNCTION_NAME: "churn-prediction-api"
-                LAMBDA_REGION: "us-east-1"
-              run: |
-                echo "Updating Lambda Function: $LAMBDA_FUNCTION_NAME"
-                aws lambda update-function-code \
-                  --function-name $LAMBDA_FUNCTION_NAME \
-                  --image-uri $ECR_REPO_URI \
-                  --region $LAMBDA_REGION
-                echo "Lambda update complete"
+      # Step 5: Update the Lambda Function
+      - name: Update Lambda Function Code
+        env:
+          ECR_REPO_URI_WITH_TAG: "YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_AWS_REGION.amazonaws.com/YOUR_REPO_NAME:latest"
+          LAMBDA_FUNCTION_NAME: "YOUR_LAMBDA_FUNCTION_NAME"
+          LAMBDA_REGION: "YOUR_AWS_REGION"
+        run: |
+          echo "Updating Lambda Function: $LAMBDA_FUNCTION_NAME"
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --image-uri $ECR_REPO_URI_WITH_TAG \
+            --region $LAMBDA_REGION
+          echo "Lambda update complete"

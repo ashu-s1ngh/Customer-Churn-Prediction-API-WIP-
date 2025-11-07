@@ -1,6 +1,42 @@
-# Ignore local development files
-__pycache__
-*.pyc
+# --- Docker ---
+# The Dockerfile is used to *build* the image,
+# but it doesn't need to be *inside* the image.
+Dockerfile
+
+# --- Python ---
+# Ignore the local virtual environment
 .venv
-.git
+venv
+env
+
+# Ignore Python's compiled bytecode and cache folders
+__pycache__/
+*.pyc
+
+# --- Git ---
+# Ignore the entire git history and configuration
+.git/
 .gitignore
+
+# --- Documentation ---
+# The README is for GitHub, not for the running container
+README.md
+
+# --- Project Folders ---
+# Ignore the CI/CD workflow definitions
+.github/
+
+# CRITICAL: Ignore the training folder.
+# The raw data (.csv) and training scripts (.ipynb) are not
+# needed for the API to run. The API only needs the .joblib files.
+training/
+
+# --- Editor Configs ---
+# Ignore local editor settings
+.vscode/
+.idea/
+
+# --- OS-specific ---
+# Ignore Mac and Windows junk files
+.DS_Store
+Thumbs.db

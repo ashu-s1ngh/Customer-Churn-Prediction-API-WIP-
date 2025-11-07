@@ -133,3 +133,12 @@ You can build and run this entire API on your local machine.
 
 4.  **Access the API:**
     Your API is now running. Open your browser and go to `http://127.0.0.1:8000/docs` to see the interactive (Swagger) API documentation and send test predictions.
+
+**Terminal view:**
+<img width="1611" height="249" alt="image" src="https://github.com/user-attachments/assets/a09780d6-4cf7-41ae-8983-e3c57ef52982" />
+
+**Example entry:**
+<img width="1899" height="902" alt="image" src="https://github.com/user-attachments/assets/1330d7cc-fd10-4112-bfb0-17ad84d42397" />
+
+**Prediction:**
+<img width="1899" height="913" alt="image" src="https://github.com/user-attachments/assets/2a6e3093-9200-4f82-a3c1-a9f1548e81fe" />
